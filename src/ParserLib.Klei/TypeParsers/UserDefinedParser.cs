@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using SheepReaper.GameSaves.Interfaces;
+﻿using SheepReaper.GameSaves.Interfaces;
 using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
+using System;
+using System.Collections.Generic;
 
 namespace SheepReaper.GameSaves.TypeParsers
 {
@@ -20,9 +20,20 @@ namespace SheepReaper.GameSaves.TypeParsers
 
             var parseLength = parseEnd - parseStart;
 
+            if(parseLength<dataLength)
+            {
+                var bytes = reader.ReadBytes(dataLength - parseLength);
+
+                foreach (var thisByte in bytes)
+                {
+                    Console.WriteLine(Convert.ToChar(thisByte));
+                }
+            }
+
             if (parseLength != dataLength)
-                //throw new InvalidOperationException(
-                Console.Error.WriteLine($"Failed to parse object: Template name: {templateName} parsed {parseLength - dataLength} more than expected.");
+                throw new InvalidOperationException(
+                //Console.Error.WriteLine(
+                    $"Failed to parse object: Template name: {templateName} parsed {parseLength - dataLength} more than expected.");
 
             return obj;
         }

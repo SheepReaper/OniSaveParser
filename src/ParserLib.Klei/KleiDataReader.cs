@@ -17,8 +17,6 @@ namespace SheepReaper.GameSaves
         private static readonly List<SerializationTypeCode> GenericTypes = new List<SerializationTypeCode>
         {
             SerializationTypeCode.List,
-            //SerializationTypeCode.Streamed,
-            //SerializationTypeCode.Unknown1,
             SerializationTypeCode.Pair,
             SerializationTypeCode.Dictionary,
             SerializationTypeCode.HashSet,
@@ -55,7 +53,7 @@ namespace SheepReaper.GameSaves
 
         private GameObjectBehavior ParseGameObjectBehavior()
         {
-            var name = ValidateDotNetIdentifierName(ReadKleiString());
+            var name = ValidateDotNetIdentifierName(ReadString());
 
             var dataLength = ReadInt32();
 
@@ -102,7 +100,7 @@ namespace SheepReaper.GameSaves
 
         private GameObjectGroup ParseGameObjectGroup()
         {
-            var prefabName = ValidateDotNetIdentifierName(ReadKleiString());
+            var prefabName = ValidateDotNetIdentifierName(ReadString());
             var instanceCount = ReadInt32();
             var dataLength = ReadInt32();
             var preParsePosition = Position;
@@ -161,7 +159,7 @@ namespace SheepReaper.GameSaves
         private Settings ParseSettings()
         {
             var assemblyTypeName = "Game+Settings";
-            var typeName = ValidateDotNetIdentifierName(ReadKleiString());
+            var typeName = ValidateDotNetIdentifierName(ReadString());
             if (typeName != assemblyTypeName)
                 throw new InvalidOperationException($"Expected {assemblyTypeName} but read {typeName} instead.");
             var serialized = JsonConvert.SerializeObject(Parse(Templates, assemblyTypeName));
@@ -177,7 +175,7 @@ namespace SheepReaper.GameSaves
 
             for (var i = 0; i < templateCount; i++)
             {
-                var name = ValidateDotNetIdentifierName(ReadKleiString());
+                var name = ValidateDotNetIdentifierName(ReadString());
                 var fieldCount = ReadInt32();
                 var propertyCount = ReadInt32();
 
@@ -206,7 +204,7 @@ namespace SheepReaper.GameSaves
             {
                 members[i] = new TemplateMember
                 {
-                    Name = ValidateDotNetIdentifierName(ReadKleiString()),
+                    Name = ValidateDotNetIdentifierName(ReadString()),
                     Type = ParseTypeInfo()
                 };
             }
@@ -231,7 +229,7 @@ namespace SheepReaper.GameSaves
             if (type == SerializationTypeCode.UserDefined || type == SerializationTypeCode.Enumeration ||
                 type.IsValueType())
             {
-                var userTypeName = ReadKleiString();
+                var userTypeName = ReadString();
                 if (string.IsNullOrEmpty(userTypeName))
                     throw new InvalidDataException("Type name cannot be null for a user-defined or enumeration type.");
                 templateName = userTypeName;
@@ -268,13 +266,13 @@ namespace SheepReaper.GameSaves
 
         private World ParseWorld()
         {
-            var worldMarker = ReadKleiString();
+            var worldMarker = ReadString();
             if (worldMarker != "world")
             {
                 Console.Error.WriteLine("Expected 'World' string.");
             }
 
-            var typename = ValidateDotNetIdentifierName(ReadKleiString());
+            var typename = ValidateDotNetIdentifierName(ReadString());
             if (typename != "Klei.SaveFileRoot")
                 throw new InvalidOperationException($"Expected type name Klei.SaveFileRoot but got {typename}.");
 
@@ -433,7 +431,7 @@ namespace SheepReaper.GameSaves
         /// WARNING: Sequence Sensitive!
         /// </summary>
         /// <returns></returns>
-        public string ReadKleiString()
+        public override string ReadString()
         {
             var stringLength = ReadInt32();
             //Console.WriteLine($"Call to Klei String: Requested string length: {stringLength}");

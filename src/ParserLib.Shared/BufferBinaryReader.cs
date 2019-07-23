@@ -29,7 +29,6 @@ namespace SheepReaper.GameSaves
 
         public BufferBinaryReader(Stream stream, Encoding encoding, bool leaveOpen) : base(stream.ToStatic(stream.CanWrite), encoding, leaveOpen)
         {
-            //CanGetBuffer = stream is MemoryStream asMs ? asMs.CheckCanGetBuffer() : false;
         }
 
         public bool CanGetBuffer { get; } = true;

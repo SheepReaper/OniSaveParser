@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using SheepReaper.GameSaves.Interfaces;
+﻿using SheepReaper.GameSaves.Interfaces;
 using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
+using System.Collections.Generic;
 
 namespace SheepReaper.GameSaves.TypeParsers
 {
@@ -13,7 +13,7 @@ namespace SheepReaper.GameSaves.TypeParsers
 
             for (var i = 0; i < itemCount; i++)
             {
-                var name = reader.ValidateDotNetIdentifierName(reader.ReadKleiString());
+                var name = reader.ValidateDotNetIdentifierName(reader.ReadString());
                 var gameObject = reader.ParseGameObject();
                 items[i] = new
                 {

@@ -2,7 +2,7 @@
 
 namespace SheepReaper.GameSaves
 {
-    [Flags]
+    //[Flags]
     public enum SerializationTypeCode
     {
         UserDefined = 0,
@@ -28,18 +28,14 @@ namespace SheepReaper.GameSaves
         List = 20,
         HashSet = 21,
         Color = 22,
-        //VALUE_MASK = 63,
-        //IS_VALUE_TYPE = 64,
-        //IS_GENERIC_TYPE = 128,
-        //Streamed = 147,
-        //Unknown1 = 148
     }
 
     [Flags]
     public enum SerializationTypeFlags
     {
-        VALUE_MASK = 63,
+        //VALUE_MASK = 63,
         IS_VALUE_TYPE = 64,
+
         IS_GENERIC_TYPE = 128,
     }
 }

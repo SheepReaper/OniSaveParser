@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using SheepReaper.GameSaves.Interfaces;
+﻿using SheepReaper.GameSaves.Interfaces;
 using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
+using System.Collections.Generic;
 
 namespace SheepReaper.GameSaves.TypeParsers
 {

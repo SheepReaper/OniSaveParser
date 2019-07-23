@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using SheepReaper.GameSaves.Interfaces;
+﻿using SheepReaper.GameSaves.Interfaces;
 using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
+using System.Collections.Generic;
 
 namespace SheepReaper.GameSaves.TypeParsers
 {
@@ -8,7 +8,7 @@ namespace SheepReaper.GameSaves.TypeParsers
     {
         public string Parse(IKleiDataReader reader, TypeInfoElement info, List<Template> templates)
         {
-            return reader.ReadKleiString();
+            return reader.ReadString();
         }
 
         object IParser.Parse(IKleiDataReader reader, TypeInfoElement info, List<Template> templates)

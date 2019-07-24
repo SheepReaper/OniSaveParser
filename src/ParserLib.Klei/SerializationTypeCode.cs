@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SheepReaper.GameSaves
+namespace SheepReaper.GameSaves.Klei
 {
     //[Flags]
     public enum SerializationTypeCode

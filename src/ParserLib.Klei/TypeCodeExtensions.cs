@@ -1,4 +1,4 @@
-﻿namespace SheepReaper.GameSaves
+﻿namespace SheepReaper.GameSaves.Klei
 {
     public static class TypeCodeExtensions
     {

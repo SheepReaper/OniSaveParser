@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 
-namespace SheepReaper.GameSaves.Model.SaveFile.TypeTemplates
+namespace SheepReaper.GameSaves.Klei
 {
-    public class TypeInfoElement
+    public class TypeInfo
     {
         public SerializationTypeCode InferredType { get; internal set; }
         public int InferredTypeInt { get; internal set; }
         public SerializationTypeCode Info { get; set; }
-        public List<TypeInfoElement> SubTypes { get; set; }
+        public List<TypeInfo> SubTypes { get; set; }
 
         public string TemplateName { get; set; }
 

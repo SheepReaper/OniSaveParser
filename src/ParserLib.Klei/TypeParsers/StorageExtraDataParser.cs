@@ -1,12 +1,10 @@
-﻿using SheepReaper.GameSaves.Interfaces;
-using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace SheepReaper.GameSaves.TypeParsers
+namespace SheepReaper.GameSaves.Klei.TypeParsers
 {
     public class StorageExtraDataParser : IExtraDataParser
     {
-        public List<object> Parse(IKleiDataReader reader, List<Template> templates)
+        public List<object> Parse(IDataReader reader, List<Template> templates)
         {
             var itemCount = reader.ReadInt32();
             var items = new List<object>(itemCount);

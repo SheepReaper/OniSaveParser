@@ -1,16 +1,14 @@
 ﻿using Ionic.Zlib;
-using SheepReaper.GameSaves.Model;
 using System;
 using System.IO;
 
-namespace SheepReaper.GameSaves
+namespace SheepReaper.GameSaves.Klei
 {
-    public class SaveGameParser
+    public class Deserializer : IDisposable
     {
-        private KleiDataReader _dr;
+        private DataReader _dr;
+        private GameSave _gameSave;
         private bool _isParsed;
-        private SaveGameBody _sfb;
-        private SaveFileHeadPart _sfh;
 
         private void DecompressBody()
         {
@@ -20,12 +18,12 @@ namespace SheepReaper.GameSaves
             var uncompressedStream = new MemoryStream(new byte[uncompressedLength], 0, uncompressedLength, true, true);
             uncompressedStream.Write(_dr.GetBuffer().Slice(0, bodyStartPosition));
             uncompressedStream.Write(uncompressedBodyBytes);
-            _dr = new KleiDataReader(uncompressedStream)
+            _dr = new DataReader(uncompressedStream)
             {
                 Position = bodyStartPosition,
                 Templates = _dr.Templates,
             };
-            _sfh.BodyIsCompressed = false;
+            _gameSave.BodyIsCompressed = false;
         }
 
         private void Parse(bool isConfigured)
@@ -39,56 +37,65 @@ namespace SheepReaper.GameSaves
             if (!_isParsed) throw new InvalidOperationException("SaveFile has not been parsed yet");
         }
 
-        public SaveGameParser()
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _dr?.Dispose();
+            }
+        }
+
+        public Deserializer()
         {
         }
 
-        public SaveGameParser(Span<byte> buffer)
+        public Deserializer(Span<byte> buffer)
         {
-            _dr = new KleiDataReader(buffer);
+            _dr = new DataReader(buffer);
             Parse(true);
         }
 
-        public SaveGameParser(Stream stream)
+        public Deserializer(Stream stream)
         {
-            _dr = new KleiDataReader(stream);
+            _dr = new DataReader(stream);
             Parse(true);
         }
 
-        public SaveGameParser(string pathToSaveFile)
+        public Deserializer(string pathToSaveFile)
         {
-            _dr = new KleiDataReader(new FileStream(pathToSaveFile, FileMode.Open));
+            _dr = new DataReader(new FileStream(pathToSaveFile, FileMode.Open));
             Parse(true);
+        }
+
+        public GameSave GameSave
+        {
+            get
+            {
+                ThrowIfNotParsed();
+                return _gameSave;
+            }
         }
 
         public bool IsConfigured { get; private set; }
 
-        public SaveGameBody SaveFileBody
+        public void Dispose()
         {
-            get
-            {
-                ThrowIfNotParsed();
-                return _sfb;
-            }
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
-        public SaveFileHeadPart SaveFileHeader
-        {
-            get
-            {
-                ThrowIfNotParsed();
-                return _sfh;
-            }
-        }
-
-        public void Parse()
+        public GameSave Parse()
         {
             if (!IsConfigured) throw new InvalidOperationException("Cannot call 'Parse' on a Parser that is not configured.");
-            _sfh = _dr.GetSaveFileHeader();
-            if (_sfh.BodyIsCompressed) DecompressBody();
-            _sfb = _dr.ParseSaveFileBody();
 
+            _gameSave = _dr.ParseHeaderAndTemplates();
+
+            if (_gameSave.BodyIsCompressed) DecompressBody();
+
+            _gameSave.Body = _dr.ParseSaveFileBody();
             _isParsed = true;
+
+            return _gameSave;
         }
     }
 }

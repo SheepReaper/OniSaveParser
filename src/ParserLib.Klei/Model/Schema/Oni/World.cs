@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SheepReaper.GameSaves.Model.SaveFile.Schema
+namespace SheepReaper.GameSaves.Klei.Schema.Oni
 {
     public class World
     {

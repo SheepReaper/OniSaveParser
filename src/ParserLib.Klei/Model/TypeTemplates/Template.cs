@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SheepReaper.GameSaves.Model.SaveFile.TypeTemplates
+namespace SheepReaper.GameSaves.Klei
 {
     public class Template
     {

@@ -1,12 +1,10 @@
-﻿using SheepReaper.GameSaves.Interfaces;
-using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace SheepReaper.GameSaves.TypeParsers
+namespace SheepReaper.GameSaves.Klei.TypeParsers
 {
     public class DictionaryParser : IParser<object[][]>
     {
-        public object[][] Parse(IKleiDataReader reader, TypeInfoElement info, List<Template> templates)
+        public object[][] Parse(IDataReader reader, TypeInfo info, List<Template> templates)
         {
             var keyType = info.SubTypes[0];
             var valueType = info.SubTypes[1];
@@ -27,6 +25,6 @@ namespace SheepReaper.GameSaves.TypeParsers
             return pairs;
         }
 
-        object IParser.Parse(IKleiDataReader reader, TypeInfoElement info, List<Template> templates) => Parse(reader, info, templates);
+        object IParser.Parse(IDataReader reader, TypeInfo info, List<Template> templates) => Parse(reader, info, templates);
     }
 }

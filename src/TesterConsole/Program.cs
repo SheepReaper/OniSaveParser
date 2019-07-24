@@ -1,90 +1,42 @@
 ﻿using Newtonsoft.Json;
-using SheepReaper.GameSaves;
-using SheepReaper.GameSaves.Model;
-using SheepReaper.GameSaves.Model.SaveFile.Schema;
-using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
+using SheepReaper.GameSaves.Klei;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using ZeroFormatter;
 
 namespace TesterConsole
 {
     internal class Program
     {
-        private static object CreateContext(SaveGameHeader header, List<Template> templates, KleiDataReader dataReader)
-        {
-            throw new NotImplementedException();
-        }
-
         private static void Main(string[] args)
         {
-            SaveGameHeader header;
-            List<Template> templates;
-            Span<byte> buffer;
-            SaveFileHeadPart saveFileHeader;
-            SaveGameBody saveGameBody;
-            //SaveGameParser parser;
+            const string saveFileLocation = "F:\\Documents\\Klei\\OxygenNotIncluded\\save_files\\plucky.sav";
+            const string jsonOutputLocation = "C:\\temp\\output.json";
 
-            using (var fileStream = new FileStream("F:\\Documents\\Klei\\OxygenNotIncluded\\save_files\\plucky.sav", FileMode.Open))
+            GameSave gameSave;
+
+            using (var deserializer = new Deserializer(saveFileLocation))
             {
-                buffer = new byte[fileStream.Length];
-                fileStream.Read(buffer);
+                gameSave = deserializer.GameSave;
             }
 
-            //var parser = new SaveGameParser(buffer);
-            var parser = new SaveGameParser("F:\\Documents\\Klei\\OxygenNotIncluded\\save_files\\plucky.sav");
-            saveFileHeader = parser.SaveFileHeader;
-            saveGameBody = parser.SaveFileBody;
+            // have fun with gameSave
 
-            // MY Stuff here
-            string metaJson = JsonConvert.SerializeObject(new
+            // write to json
+            using (var writer = new FileStream(jsonOutputLocation, FileMode.OpenOrCreate))
             {
-                saveFileHeader,
-                saveGameBody
-            }, Formatting.Indented);
+                var serialized = JsonConvert.SerializeObject(gameSave, Formatting.Indented);
+                var buffer = new Span<byte>(new byte[serialized.Length]);
+                Encoding.UTF8.GetBytes(serialized.AsSpan(), buffer);
 
-            Console.WriteLine($"meta (jsonized):\n\n{metaJson}\n");
-
-            using (var stream = new FileStream("C:\\temp\\output.json", FileMode.OpenOrCreate))
-            {
-                var stringBuffer = new Span<byte>(new byte[metaJson.AsSpan().Length]);
-                Encoding.UTF8.GetBytes(metaJson.AsSpan(), stringBuffer);
-                stream.Write(stringBuffer);
+                writer.Write(buffer);
             }
 
-            //Console.WriteLine(thisother);
+            // write to console
+            Console.WriteLine(JsonConvert.SerializeObject(gameSave));
 
-            //while (true)
-            //{
-            //    Console.ReadKey();
-            //    Console.WriteLine(dataReader.ReadByte());
-            //}
-
-            //var ms = new MemoryStream();
-            //var bytes = new byte[100]
-
+            Console.WriteLine("\nDemo Finished, press ANY key to exit...");
             Console.ReadKey();
-        }
-
-        private static void Main2(string[] args)
-        {
-            var root = new List<object>();
-            root.Add(new SaveFileHeadPart());
-            var list = new List<object>();
-            list.Add(new World());
-            list.Add(new World());
-
-            root.Add(list);
-
-            var bf = new BinaryFormatter();
-            using (var stream = new FileStream("C:\\temp\\output2.sav", FileMode.OpenOrCreate))
-            {
-                ZeroFormatterSerializer.Serialize(stream, root);
-                //bf.Serialize(stream, root);
-            }
         }
     }
 }

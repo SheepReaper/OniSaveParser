@@ -1,16 +1,14 @@
-﻿using SheepReaper.GameSaves.Interfaces;
-using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace SheepReaper.GameSaves.TypeParsers
+namespace SheepReaper.GameSaves.Klei.TypeParsers
 {
     public class Vector2IParser : IParser<Vector2I>
     {
-        public Vector2I Parse(IKleiDataReader reader, TypeInfoElement info, List<Template> templates)
+        public Vector2I Parse(IDataReader reader, TypeInfo info, List<Template> templates)
         {
             return reader.ReadVector2I();
         }
 
-        object IParser.Parse(IKleiDataReader reader, TypeInfoElement info, List<Template> templates) => Parse(reader, info, templates);
+        object IParser.Parse(IDataReader reader, TypeInfo info, List<Template> templates) => Parse(reader, info, templates);
     }
 }

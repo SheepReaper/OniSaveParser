@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
 
-namespace SheepReaper.GameSaves.Model.SaveFile.Schema
+namespace SheepReaper.GameSaves.Klei.Schema.Oni
 {
     public class GameObject
     {

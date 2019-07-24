@@ -1,10 +1,9 @@
-﻿using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace SheepReaper.GameSaves.Interfaces
+namespace SheepReaper.GameSaves.Klei
 {
     public interface IExtraDataParser
     {
-        public List<object> Parse(IKleiDataReader reader, List<Template> templates);
+        public List<object> Parse(IDataReader reader, List<Template> templates);
     }
 }

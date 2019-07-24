@@ -1,13 +1,11 @@
-﻿using SheepReaper.GameSaves.Interfaces;
-using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace SheepReaper.GameSaves.TypeParsers
+namespace SheepReaper.GameSaves.Klei.TypeParsers
 {
     public class UserDefinedParser : IParser
     {
-        public object Parse(IKleiDataReader reader, TypeInfoElement info, List<Template> templates)
+        public object Parse(IDataReader reader, TypeInfo info, List<Template> templates)
         {
             var templateName = info.TemplateName;
             var dataLength = reader.ReadInt32();

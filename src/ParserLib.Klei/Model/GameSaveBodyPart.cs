@@ -1,10 +1,10 @@
-﻿using SheepReaper.GameSaves.Model.SaveFile.Schema;
+﻿using SheepReaper.GameSaves.Klei.Schema.Oni;
 using System;
 using System.Collections.Generic;
 
-namespace SheepReaper.GameSaves.Model
+namespace SheepReaper.GameSaves.Klei
 {
-    public class SaveGameBody
+    public class GameSaveBodyPart
     {
         public GameData GameData { get; set; }
         public List<GameObjectGroup> GameObjects { get; set; }

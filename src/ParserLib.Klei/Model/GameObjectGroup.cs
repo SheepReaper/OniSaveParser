@@ -1,7 +1,7 @@
-﻿using SheepReaper.GameSaves.Model.SaveFile.Schema;
+﻿using SheepReaper.GameSaves.Klei.Schema.Oni;
 using System.Collections.Generic;
 
-namespace SheepReaper.GameSaves.Model
+namespace SheepReaper.GameSaves.Klei
 {
     public class GameObjectGroup
     {

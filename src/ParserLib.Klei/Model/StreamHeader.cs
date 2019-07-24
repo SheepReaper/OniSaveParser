@@ -1,8 +1,8 @@
-﻿using SheepReaper.GameSaves.Model.SaveFile.Schema;
+﻿using SheepReaper.GameSaves.Klei.Schema.Oni;
 
-namespace SheepReaper.GameSaves.Model
+namespace SheepReaper.GameSaves.Klei
 {
-    public class SaveGameHeader
+    public class StreamHeader
     {
         public bool BodyIsCompressed { get; set; }
         public int BuildVersion { get; set; }

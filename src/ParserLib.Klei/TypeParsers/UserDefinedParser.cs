@@ -20,15 +20,25 @@ namespace SheepReaper.GameSaves.TypeParsers
 
             var parseLength = parseEnd - parseStart;
 
-            if(parseLength<dataLength)
+            if (parseLength < dataLength)
             {
-                var bytes = reader.ReadBytes(dataLength - parseLength);
-
-                foreach (var thisByte in bytes)
+                var extraString = reader.ReadString();
+                obj = new
                 {
-                    Console.WriteLine(Convert.ToChar(thisByte));
-                }
+                    obj,
+                    extraString,
+                };
+                //var bytes = reader.ReadBytes(dataLength - parseLength);
+
+                //foreach (var thisByte in bytes)
+                //{
+                //    Console.WriteLine(Convert.ToChar(thisByte));
+                //}
+                Console.WriteLine($"{extraString} was not parsed");
             }
+
+            var parseNewEnd = reader.Position;
+            parseLength = parseNewEnd - parseStart;
 
             if (parseLength != dataLength)
                 throw new InvalidOperationException(

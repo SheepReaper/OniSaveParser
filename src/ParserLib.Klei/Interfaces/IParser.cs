@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
+﻿using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
+using System.Collections.Generic;
 
 namespace SheepReaper.GameSaves.Interfaces
 {

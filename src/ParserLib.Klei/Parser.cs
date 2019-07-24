@@ -23,7 +23,7 @@ namespace SheepReaper.GameSaves
             _dr = new KleiDataReader(uncompressedStream)
             {
                 Position = bodyStartPosition,
-                Templates = _dr.Templates
+                Templates = _dr.Templates,
             };
             _sfh.BodyIsCompressed = false;
         }

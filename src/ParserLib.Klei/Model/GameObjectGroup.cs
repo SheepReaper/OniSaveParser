@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using SheepReaper.GameSaves.Model.SaveFile.Schema;
+﻿using SheepReaper.GameSaves.Model.SaveFile.Schema;
+using System.Collections.Generic;
 
 namespace SheepReaper.GameSaves.Model
 {
-    public class GameObjectGroup : List<GameObject>
+    public class GameObjectGroup
     {
         public List<GameObject> GameObjects { get; set; }
         public string Name { get; set; }

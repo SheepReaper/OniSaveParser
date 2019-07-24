@@ -1,10 +1,8 @@
-﻿using System;
+﻿using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
 using System.Collections.Generic;
-using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
 
 namespace SheepReaper.GameSaves.Model
 {
-    [Serializable]
     public class SaveFileHeadPart
     {
         public bool BodyIsCompressed { get; set; }

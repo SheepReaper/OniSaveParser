@@ -385,7 +385,7 @@ namespace SheepReaper.GameSaves
         public override int GetHashCode()
         {
             //return Combine(X.GetHashCode(), Y.GetHashCode());
-            return (((X.GetHashCode() << 5) + X.GetHashCode()) ^ Y.GetHashCode());
+            return ((X.GetHashCode() << 5) + X.GetHashCode()) ^ Y.GetHashCode();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

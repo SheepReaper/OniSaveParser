@@ -1,12 +1,13 @@
 ﻿using Newtonsoft.Json;
 using SheepReaper.GameSaves;
+using SheepReaper.GameSaves.Model;
+using SheepReaper.GameSaves.Model.SaveFile.Schema;
+using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using SheepReaper.GameSaves.Model;
-using SheepReaper.GameSaves.Model.SaveFile.Schema;
-using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
+using System.Text;
 using ZeroFormatter;
 
 namespace TesterConsole
@@ -16,24 +17,6 @@ namespace TesterConsole
         private static object CreateContext(SaveGameHeader header, List<Template> templates, KleiDataReader dataReader)
         {
             throw new NotImplementedException();
-        }
-
-        private static void Main2(string[] args)
-        {
-            var root = new List<object>();
-            root.Add(new SaveFileHeadPart());
-            var list = new List<object>();
-            list.Add(new World());
-            list.Add(new World());
-
-            root.Add(list);
-            
-            var bf = new BinaryFormatter();
-            using (var stream = new FileStream("C:\\temp\\output2.sav", FileMode.OpenOrCreate))
-            {
-                ZeroFormatterSerializer.Serialize(stream, root);
-                //bf.Serialize(stream, root);
-            }
         }
 
         private static void Main(string[] args)
@@ -61,9 +44,16 @@ namespace TesterConsole
             {
                 saveFileHeader,
                 saveGameBody
-            },Formatting.Indented);
+            }, Formatting.Indented);
 
             Console.WriteLine($"meta (jsonized):\n\n{metaJson}\n");
+
+            using (var stream = new FileStream("C:\\temp\\output.json", FileMode.OpenOrCreate))
+            {
+                var stringBuffer = new Span<byte>(new byte[metaJson.AsSpan().Length]);
+                Encoding.UTF8.GetBytes(metaJson.AsSpan(), stringBuffer);
+                stream.Write(stringBuffer);
+            }
 
             //Console.WriteLine(thisother);
 
@@ -77,6 +67,24 @@ namespace TesterConsole
             //var bytes = new byte[100]
 
             Console.ReadKey();
+        }
+
+        private static void Main2(string[] args)
+        {
+            var root = new List<object>();
+            root.Add(new SaveFileHeadPart());
+            var list = new List<object>();
+            list.Add(new World());
+            list.Add(new World());
+
+            root.Add(list);
+
+            var bf = new BinaryFormatter();
+            using (var stream = new FileStream("C:\\temp\\output2.sav", FileMode.OpenOrCreate))
+            {
+                ZeroFormatterSerializer.Serialize(stream, root);
+                //bf.Serialize(stream, root);
+            }
         }
     }
 }

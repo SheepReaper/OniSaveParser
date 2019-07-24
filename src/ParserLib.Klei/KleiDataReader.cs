@@ -1,14 +1,14 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
 using SheepReaper.GameSaves.Interfaces;
 using SheepReaper.GameSaves.Model;
 using SheepReaper.GameSaves.Model.SaveFile.Schema;
 using SheepReaper.GameSaves.Model.SaveFile.TypeTemplates;
 using SheepReaper.GameSaves.TypeParsers;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SheepReaper.GameSaves
 {
@@ -49,7 +49,16 @@ namespace SheepReaper.GameSaves
                 [SerializationTypeCode.Single] = new SingleParser(),
                 [SerializationTypeCode.Vector2I] = new Vector2IParser(),
                 [SerializationTypeCode.HashSet] = new ArrayParser(),
+                [SerializationTypeCode.Enumeration] = new IntegerParser(),
+                [SerializationTypeCode.Vector3] = new Vector3Parser(),
             };
+
+        private Version Version { get; set; }
+
+        private GameData ParseGameData()
+        {
+            return new GameData();
+        }
 
         private GameObjectBehavior ParseGameObjectBehavior()
         {
@@ -105,7 +114,7 @@ namespace SheepReaper.GameSaves
             var dataLength = ReadInt32();
             var preParsePosition = Position;
 
-            var gameObjects = new List<GameObject>(instanceCount);
+            var gameObjects = new List<GameObject>(new GameObject[instanceCount]);
             for (var i = 0; i < instanceCount; i++)
             {
                 gameObjects[i] = ParseGameObject();
@@ -135,7 +144,7 @@ namespace SheepReaper.GameSaves
         private List<GameObjectGroup> ParseGameObjects()
         {
             var count = ReadInt32();
-            var newGroups = new List<GameObjectGroup>(count);
+            var newGroups = new List<GameObjectGroup>(new GameObjectGroup[count]);
             for (var i = 0; i < count; i++)
             {
                 newGroups[i] = ParseGameObjectGroup();
@@ -153,6 +162,7 @@ namespace SheepReaper.GameSaves
 
             var majorVersion = ReadInt32();
             var minorVersion = ReadInt32();
+            Version = new Version(majorVersion, minorVersion);
             //Console.ReadKey();
         }
 
@@ -220,11 +230,10 @@ namespace SheepReaper.GameSaves
             var inferredInt = (int)info & 0x7f;
             var inferredType = (SerializationTypeCode)inferredInt;
 
-            //TODO: is this really necessary
             var type = inferredType;
 
-            string templateName = "";
-            List<TypeInfoElement> subTypes = new List<TypeInfoElement>();
+            var templateName = "";
+            var subTypes = new List<TypeInfoElement>();
 
             if (type == SerializationTypeCode.UserDefined || type == SerializationTypeCode.Enumeration ||
                 type.IsValueType())
@@ -239,7 +248,7 @@ namespace SheepReaper.GameSaves
                 (byte)SerializationTypeFlags.IS_GENERIC_TYPE)
             {
                 if (!GenericTypes.Contains(type))
-                    throw new NotSupportedException($"Unsopported non-generic type: {type} marked as generic.");
+                    throw new NotSupportedException($"Unsupported non-generic type: {type} marked as generic.");
                 var subTypeCount = ReadByte();
 
                 for (var subTypeIndex = 0; subTypeIndex < subTypeCount; subTypeIndex++)
@@ -325,6 +334,12 @@ namespace SheepReaper.GameSaves
                 result[field.Name] = value;
             }
 
+            foreach (var property in template.Properties)
+            {
+                var value = Parse(templates, property.Type);
+                result[property.Name] = value;
+            }
+
             //Console.WriteLine(JsonConvert.SerializeObject(new { template, result },Formatting.Indented));
             return result;
         }
@@ -357,10 +372,10 @@ namespace SheepReaper.GameSaves
 
             var behaviorCount = ReadInt32();
 
-            var newBehaviors = new List<GameObjectBehavior>(behaviorCount);
+            var newBehaviors = new List<GameObjectBehavior>(new GameObjectBehavior[behaviorCount]);
             for (var i = 0; i < behaviorCount; i++)
             {
-                newBehaviors.Add(ParseGameObjectBehavior());
+                newBehaviors[i] = ParseGameObjectBehavior();
             }
 
             return new GameObject
@@ -416,7 +431,9 @@ namespace SheepReaper.GameSaves
             {
                 World = ParseWorld(),
                 Settings = ParseSettings(),
+                Version = Version,
                 GameObjects = ParseGameObjects(),
+                GameData = ParseGameData(),
             };
         }
 

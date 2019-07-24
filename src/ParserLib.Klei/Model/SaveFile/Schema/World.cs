@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace SheepReaper.GameSaves.Model.SaveFile.Schema
 {
-    [Serializable]
     public class World
     {
         public List<object> Active_Mods { get; set; }

@@ -1,8 +1,5 @@
-﻿using System;
-
-namespace SheepReaper.GameSaves.Model.SaveFile.Schema
+﻿namespace SheepReaper.GameSaves.Model.SaveFile.Schema
 {
-    [Serializable]
     public class GameInfo
     {
         public string BaseName { get; set; }

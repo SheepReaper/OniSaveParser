@@ -14,7 +14,7 @@ It has 4 constructors:
 - Deserializer(): This default contructor allows you to allocate the object without triggering the deserialization automatically. You must call .Parse() explicitely if you use this constructor.
 - Deserializer(string): Accepts a path to an ONI save file and will automatically deserialize.
 - Deserializer(Stream): Accepts a Stream and will automatically deserialize. (Usually a FileStream or a MemoryStream)
-- Deserializer(Span<byte>): Accepts a Span<byte> (or byte[]) and will automatically deserialize.
+- Deserializer(Memory<byte>): Accepts a Memory<byte> (or byte[]) and will automatically deserialize.
 In all 4 cases, the deserialized object is accessible through the .GameSave Property. (and the Parse() method returns it as well, if you went that way.)
 
 ## Design Philosophy

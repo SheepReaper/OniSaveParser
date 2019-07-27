@@ -27,15 +27,15 @@ namespace SheepReaper.GameSaves.Klei
         Dictionary = 19,
         List = 20,
         HashSet = 21,
-        Color = 22,
+        Color = 22
     }
 
     [Flags]
     public enum SerializationTypeFlags
     {
         //VALUE_MASK = 63,
-        IS_VALUE_TYPE = 64,
+        IsValueType = 64,
 
-        IS_GENERIC_TYPE = 128,
+        IsGenericType = 128
     }
 }

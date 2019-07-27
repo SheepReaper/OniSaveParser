@@ -2,16 +2,20 @@
 using System.IO;
 using System.Numerics;
 using System.Text;
+using SheepReaper.GameSaves.Extensions;
 
 namespace SheepReaper.GameSaves
 {
     public class BufferBinaryReader : BinaryReader, IBinaryReader
     {
+        //private Memory<byte> _buffer;
+        public MemoryStream MemoryStream => (MemoryStream) BaseStream;
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                Stream?.Dispose();
+                MemoryStream?.Dispose();
             }
 
             base.Dispose(disposing);
@@ -37,14 +41,11 @@ namespace SheepReaper.GameSaves
         {
         }
 
-        public BufferBinaryReader(Stream stream, Encoding encoding, bool leaveOpen) : base(stream.ToStatic(stream.CanWrite).TeeAs<MemoryStream>(out var teeStream), encoding, leaveOpen)
+        public BufferBinaryReader(Stream stream, Encoding encoding, bool leaveOpen) : base(stream.ToExpandable(stream.CanWrite).TeeAs<MemoryStream>(out var teeStream), encoding, leaveOpen)
         {
-            Stream = teeStream;
-            teeStream.TryGetBuffer(out var buffer);
-            Buffer = new Memory<byte>(buffer.Array);
         }
 
-        public Memory<byte> Buffer { get; set; }
+        public Memory<byte> Buffer => BaseStream.GetMemory();
 
         public long Position
         {
@@ -54,7 +55,11 @@ namespace SheepReaper.GameSaves
 
         public int PositionInt { get => (int)BaseStream.Position; set => BaseStream.Position = value; }
 
-        public MemoryStream Stream { get; set; }
+        //public MemoryStream Stream
+        //{
+        //    get => _stream;
+        //    set => _stream = value;
+        //}
 
         public Span<byte> GetBufferSpan()
         {
@@ -76,7 +81,7 @@ namespace SheepReaper.GameSaves
                 X = ReadSingle(),
                 Y = ReadSingle(),
                 Z = ReadSingle(),
-                W = ReadSingle(),
+                W = ReadSingle()
             };
         }
 
@@ -85,7 +90,7 @@ namespace SheepReaper.GameSaves
             return new Vector2
             {
                 X = ReadSingle(),
-                Y = ReadSingle(),
+                Y = ReadSingle()
             };
         }
 
@@ -94,7 +99,7 @@ namespace SheepReaper.GameSaves
             return new Vector2I
             {
                 X = ReadInt32(),
-                Y = ReadInt32(),
+                Y = ReadInt32()
             };
         }
 
@@ -104,7 +109,7 @@ namespace SheepReaper.GameSaves
             {
                 X = ReadSingle(),
                 Y = ReadSingle(),
-                Z = ReadSingle(),
+                Z = ReadSingle()
             };
         }
 

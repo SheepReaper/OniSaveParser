@@ -2,7 +2,7 @@
 using System.IO;
 using System.Reflection;
 
-namespace SheepReaper.GameSaves
+namespace SheepReaper.GameSaves.Extensions
 {
     public static class StreamExtensions
     {
@@ -44,16 +44,24 @@ namespace SheepReaper.GameSaves
         public static bool CheckIsExpandable(this Stream stream)
         {
             return stream is MemoryStream asMemoryStream
-                   && (bool)typeof(MemoryStream).GetField("_expandable", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(asMemoryStream);
+                   && (bool)typeof(MemoryStream)
+                       .GetField("_expandable", BindingFlags.Instance | BindingFlags.NonPublic)
+                       ?.GetValue(asMemoryStream);
         }
 
         public static T TeeAs<T>(this Stream input, out T stream) where T : Stream
         {
-            if (!(input is T asT))
-                throw new NotSupportedException(
-                    $"The input Stream is not a {typeof(T)}. Requested Tee Cast is not possible.");
-            stream = asT;
-            return asT;
+            stream = input as T ?? throw new NotSupportedException(
+                         $"The input Stream is not a {typeof(T)}. Requested Tee Cast is not possible.");
+            return stream;
+        }
+
+        public static Memory<byte> GetMemory(this Stream stream)
+        {
+            var asMs = stream as MemoryStream ??
+                       throw new NotSupportedException("This Stream does not support direct Memory access.");
+            asMs.TryGetBuffer(out var segment);
+            return segment;
         }
 
         public static MemoryStream ToExpandable(this Stream stream, bool writable = true, bool preservePosition = true)

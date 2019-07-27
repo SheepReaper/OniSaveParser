@@ -16,7 +16,7 @@ namespace SheepReaper.GameSaves.Klei.TypeParsers
                 items[i] = new
                 {
                     name,
-                    gameObject,
+                    gameObject
                 };
             }
             return items;

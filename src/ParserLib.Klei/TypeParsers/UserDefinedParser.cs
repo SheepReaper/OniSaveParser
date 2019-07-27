@@ -24,7 +24,7 @@ namespace SheepReaper.GameSaves.Klei.TypeParsers
                 obj = new
                 {
                     obj,
-                    extraString,
+                    extraString
                 };
                 //var bytes = reader.ReadBytes(dataLength - parseLength);
 

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Ionic.Zlib;
+using Newtonsoft.Json;
 using SheepReaper.GameSaves.Klei.Schema.Oni;
 using SheepReaper.GameSaves.Klei.TypeParsers;
 using System;
@@ -7,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using SheepReaper.GameSaves.Extensions;
 
 namespace SheepReaper.GameSaves.Klei
 {
@@ -19,23 +21,17 @@ namespace SheepReaper.GameSaves.Klei
             SerializationTypeCode.Dictionary,
             SerializationTypeCode.HashSet,
             SerializationTypeCode.UserDefined,
-            SerializationTypeCode.Color,
+            SerializationTypeCode.Color
         };
-
-        private static readonly List<SerializationTypeCode> UserTypes = new List<SerializationTypeCode>
-        {
-        };
-
-        //private Dictionary<string, int> TrackedOffsets = new Dictionary<string, int>();
 
         private readonly Dictionary<string, IExtraDataParser> _extraDataParsers =
-            new Dictionary<string, IExtraDataParser>()
+            new Dictionary<string, IExtraDataParser>
             {
-                ["storage"] = new StorageExtraDataParser(),
+                ["storage"] = new StorageExtraDataParser()
             };
 
         private readonly Dictionary<SerializationTypeCode, IParser> _typeParsers =
-            new Dictionary<SerializationTypeCode, IParser>()
+            new Dictionary<SerializationTypeCode, IParser>
             {
                 [SerializationTypeCode.Boolean] = new BooleanParser(),
                 [SerializationTypeCode.Int32] = new IntegerParser(),
@@ -49,13 +45,23 @@ namespace SheepReaper.GameSaves.Klei
                 [SerializationTypeCode.HashSet] = new ArrayParser(),
                 [SerializationTypeCode.Enumeration] = new IntegerParser(),
                 [SerializationTypeCode.Vector3] = new Vector3Parser(),
-                [SerializationTypeCode.Vector2] = new Vector2Parser(),
+                [SerializationTypeCode.Vector2] = new Vector2Parser()
             };
 
-        private Version Version { get; set; }
+        private bool _bodyIsCompressed;
 
+        private Version _version;
+
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
         private GameData ParseGameData() => ParseSection<GameData>();
 
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
         private GameObjectBehavior ParseGameObjectBehavior()
         {
             var name = ValidateDotNetIdentifierName(ReadString());
@@ -86,7 +92,7 @@ namespace SheepReaper.GameSaves.Klei
                 {
                     Name = name,
                     TemplateData = templateData,
-                    ExtraData = extraData,
+                    ExtraData = extraData
                 };
 
             if (haveAppropriateExtraParser)
@@ -99,10 +105,14 @@ namespace SheepReaper.GameSaves.Klei
             {
                 Name = name,
                 TemplateData = templateData,
-                ExtraRaw = extraRaw,
+                ExtraRaw = extraRaw
             };
         }
 
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
         private GameObjectGroup ParseGameObjectGroup()
         {
             var prefabName = ValidateDotNetIdentifierName(ReadString());
@@ -134,10 +144,14 @@ namespace SheepReaper.GameSaves.Klei
             return new GameObjectGroup
             {
                 Name = prefabName,
-                GameObjects = gameObjects,
+                GameObjects = gameObjects
             };
         }
 
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
         private List<GameObjectGroup> ParseGameObjects()
         {
             var count = ReadInt32();
@@ -151,6 +165,10 @@ namespace SheepReaper.GameSaves.Klei
             return newGroups;
         }
 
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
         private void ParseKSav()
         {
             const string expected = "KSAV";
@@ -162,16 +180,19 @@ namespace SheepReaper.GameSaves.Klei
             var majorVersion = ReadInt32();
             var minorVersion = ReadInt32();
 
-            Version = new Version(majorVersion, minorVersion);
-            //Console.ReadKey();
+            _version = new Version(majorVersion, minorVersion);
         }
 
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
         private T ParseSection<T>() where T : SectionType
         {
             var expectedAssemblyNames = new[]
             {
                 "Game+GameSaveData",
-                "Game+Settings",
+                "Game+Settings"
             };
 
             var typeName = ValidateDotNetIdentifierName(ReadString());
@@ -186,6 +207,10 @@ namespace SheepReaper.GameSaves.Klei
             return deserialized;
         }
 
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
         private Settings ParseSettings()
         {
             var settings = ParseSection<Settings>();
@@ -201,8 +226,6 @@ namespace SheepReaper.GameSaves.Klei
         /// <returns></returns>
         private StreamHeader ParseStreamHeader()
         {
-            // TODO: Add safety checks in case this method is called out of sequence
-
             // Read
             var buildVersion = ReadInt32();
             var gameInfoStringByteLength = ReadInt32();
@@ -211,7 +234,7 @@ namespace SheepReaper.GameSaves.Klei
             var gameInfoStringBytes = new Span<byte>(ReadBytes(gameInfoStringByteLength));
 
             // Process
-            BodyIsCompressed = headerVersion >= 1;
+            _bodyIsCompressed = headerVersion >= 1;
 
             dynamic gameInfo = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(gameInfoStringBytes));
 
@@ -219,7 +242,7 @@ namespace SheepReaper.GameSaves.Klei
             {
                 BuildVersion = buildVersion,
                 HeaderVersion = headerVersion,
-                BodyIsCompressed = BodyIsCompressed,
+                BodyIsCompressed = _bodyIsCompressed,
                 GameInfo = new GameInfo
                 {
                     NumberOfCycles = gameInfo.numberOfCycles,
@@ -233,6 +256,10 @@ namespace SheepReaper.GameSaves.Klei
             };
         }
 
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
         private List<Template> ParseTemplateList(int templateCount)
         {
             var templates = new List<Template>(new Template[templateCount]);
@@ -249,17 +276,17 @@ namespace SheepReaper.GameSaves.Klei
                     Fields = ParseTemplateMemberList(fieldCount),
                     Properties = ParseTemplateMemberList(propertyCount)
                 };
-
-                //Console.WriteLine($"Parsed template {i + 1} of {templateCount}: {templates[i].Name} with {templates[i].Fields.Count} fields and {templates[i].Properties.Count} properties. At Stream Position {PositionInt} of {BaseStream.Length}.");
             }
 
             Templates = templates;
 
-            //Console.WriteLine(JsonConvert.SerializeObject(templates, Formatting.Indented));
-
             return templates;
         }
 
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
         private List<TemplateMember> ParseTemplateMemberList(int memberCount)
         {
             var members = new List<TemplateMember>(new TemplateMember[memberCount]);
@@ -276,17 +303,19 @@ namespace SheepReaper.GameSaves.Klei
             return members;
         }
 
-        // TODO: Add safety checks in case this method is called out of sequence
         /// <summary>
         /// WARNING: Sequence sensitive!
         /// </summary>
         /// <returns></returns>
         private List<Template> ParseTemplates() => ParseTemplateList(ReadInt32());
 
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
         private TypeInfo ParseTypeInfo()
         {
             var typeCodeInt = ReadByte();
-            //Console.WriteLine(typeCodeInt.ToString());
             var info = (SerializationTypeCode)typeCodeInt;
             var inferredInt = (int)info & 0x7f;
             var inferredType = (SerializationTypeCode)inferredInt;
@@ -306,8 +335,8 @@ namespace SheepReaper.GameSaves.Klei
                 templateName = userTypeName;
             }
 
-            if (((byte)info & (byte)SerializationTypeFlags.IS_GENERIC_TYPE) ==
-                (byte)SerializationTypeFlags.IS_GENERIC_TYPE)
+            if (((byte)info & (byte)SerializationTypeFlags.IsGenericType) ==
+                (byte)SerializationTypeFlags.IsGenericType)
             {
                 if (!GenericTypes.Contains(type))
                     throw new NotSupportedException($"Unsupported non-generic type: {type} marked as generic.");
@@ -333,7 +362,7 @@ namespace SheepReaper.GameSaves.Klei
                 InferredType = inferredType,
                 InferredTypeInt = inferredInt,
                 TemplateName = templateName,
-                SubTypes = subTypes,
+                SubTypes = subTypes
             };
         }
 
@@ -355,25 +384,64 @@ namespace SheepReaper.GameSaves.Klei
             var serialized = JsonConvert.SerializeObject(obj);
             var deserialized = JsonConvert.DeserializeObject<World>(serialized);
 
-            //Console.WriteLine(JsonConvert.SerializeObject(obj));
-
-            //Console.ReadLine();
-
             return deserialized;
         }
 
-        public List<Template> Templates;
-
-        public DataReader(Memory<byte> buffer) : base(buffer)
+        internal DataReader(Memory<byte> buffer) : base(buffer)
         {
         }
 
-        public DataReader(Stream stream) : base(stream)
+        internal DataReader(Stream stream) : base(stream)
         {
         }
 
-        public bool BodyIsCompressed { get; private set; }
+        internal void DecompressBody()
+        {
+            var bodyStartPosition = PositionInt;
+            var uncompressedBodyBytes = ZlibStream.UncompressBuffer(Buffer.GetBuffer()[new Range(bodyStartPosition, (int)BaseStream.Length)]);
 
+            BaseStream.Write(uncompressedBodyBytes.AsSpan());
+            BaseStream.Position = bodyStartPosition;
+            _bodyIsCompressed = false;
+        }
+
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
+        internal GameSave ParseHeaderAndTemplates()
+        {
+            return new GameSave
+            {
+                Header = ParseStreamHeader(),
+                Templates = ParseTemplates(),
+                BodyIsCompressed = _bodyIsCompressed,
+                BodyStartIndex = PositionInt
+            };
+        }
+
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
+        internal GameSaveBodyPart ParseSaveFileBody()
+        {
+            return new GameSaveBodyPart
+            {
+                World = ParseWorld(),
+                Settings = ParseSettings(),
+                Version = _version,
+                GameObjects = ParseGameObjects(),
+                GameData = ParseGameData()
+            };
+        }
+
+        public List<Template> Templates { get; set; }
+
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
         public object Parse(List<Template> templates, string templateName)
         {
             var template = templates.Find(t => t.Name == templateName);
@@ -398,10 +466,13 @@ namespace SheepReaper.GameSaves.Klei
                 result[property.Name] = value;
             }
 
-            //Console.WriteLine(JsonConvert.SerializeObject(new { template, result },Formatting.Indented));
             return result;
         }
 
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
         public object Parse(List<Template> templates, TypeInfo type)
         {
             var typeElem = type.Info.GetImpliedType();
@@ -411,16 +482,18 @@ namespace SheepReaper.GameSaves.Klei
                 var parser = _typeParsers[typeElem];
                 var result = parser.Parse(this, type, templates);
 
-                //Console.WriteLine(JsonConvert.SerializeObject(result, Formatting.Indented));
-
                 return result;
             }
             catch (KeyNotFoundException ex)
             {
-                throw new KeyNotFoundException($"No parser is registered for {type}. (typeinfo: {typeElem}).", ex);
+                throw new KeyNotFoundException($"No parser is registered for {type}. (type info: {typeElem}).", ex);
             }
         }
 
+        /// <summary>
+        /// WARNING: Sequence Sensitive!
+        /// </summary>
+        /// <returns></returns>
         public GameObject ParseGameObject()
         {
             var position = ReadVector3();
@@ -441,30 +514,7 @@ namespace SheepReaper.GameSaves.Klei
                 Rotation = rotation,
                 Scale = scale,
                 Folder = folder,
-                Behaviors = newBehaviors,
-            };
-        }
-
-        public GameSave ParseHeaderAndTemplates()
-        {
-            return new GameSave
-            {
-                Header = ParseStreamHeader(),
-                Templates = ParseTemplates(),
-                BodyIsCompressed = BodyIsCompressed,
-                BodyStartIndex = PositionInt,
-            };
-        }
-
-        public GameSaveBodyPart ParseSaveFileBody()
-        {
-            return new GameSaveBodyPart
-            {
-                World = ParseWorld(),
-                Settings = ParseSettings(),
-                Version = Version,
-                GameObjects = ParseGameObjects(),
-                GameData = ParseGameData(),
+                Behaviors = newBehaviors
             };
         }
 
@@ -475,7 +525,6 @@ namespace SheepReaper.GameSaves.Klei
         public override string ReadString()
         {
             var stringLength = ReadInt32();
-            //Console.WriteLine($"Call to Klei String: Requested string length: {stringLength}");
 
             switch (stringLength)
             {
@@ -492,11 +541,11 @@ namespace SheepReaper.GameSaves.Klei
 
                     string value;
 
-                    value = Encoding.UTF8.GetString(GetBufferSpan().Slice(PositionInt, stringLength));
+                    value = Encoding.UTF8.GetString(
+                        Buffer[new Range(PositionInt, PositionInt + stringLength)].Span);
 
                     BaseStream.Position += stringLength;
 
-                    //Console.WriteLine($"value of decoded string: {value}");
                     return value;
             }
         }

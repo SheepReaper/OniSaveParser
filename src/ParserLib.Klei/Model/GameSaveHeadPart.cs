@@ -6,7 +6,7 @@ namespace SheepReaper.GameSaves.Klei
     {
         public bool BodyIsCompressed { get; set; }
         public int BodyStartIndex { get; set; }
-        public StreamHeader header { get; set; }
-        public List<Template> templates { get; set; }
+        public StreamHeader Header { get; set; }
+        public List<Template> Templates { get; set; }
     }
 }

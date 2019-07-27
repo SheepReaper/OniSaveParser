@@ -1,5 +1,4 @@
-﻿using Ionic.Zlib;
-using System;
+﻿using System;
 using System.IO;
 
 namespace SheepReaper.GameSaves.Klei
@@ -9,22 +8,6 @@ namespace SheepReaper.GameSaves.Klei
         private DataReader _dr;
         private GameSave _gameSave;
         private bool _isParsed;
-
-        private void DecompressBody()
-        {
-            var bodyStartPosition = _dr.PositionInt;
-            var uncompressedBodyBytes = ZlibStream.UncompressBuffer(_dr.GetBufferSpan().Slice(bodyStartPosition).ToArray());
-            var uncompressedLength = bodyStartPosition + uncompressedBodyBytes.Length;
-            var uncompressedStream = new MemoryStream(new byte[uncompressedLength], 0, uncompressedLength, true, true);
-            uncompressedStream.Write(_dr.GetBufferSpan().Slice(0, bodyStartPosition));
-            uncompressedStream.Write(uncompressedBodyBytes);
-            _dr = new DataReader(uncompressedStream)
-            {
-                PositionInt = bodyStartPosition,
-                Templates = _dr.Templates,
-            };
-            _gameSave.BodyIsCompressed = false;
-        }
 
         private void Parse(bool isConfigured)
         {
@@ -90,7 +73,11 @@ namespace SheepReaper.GameSaves.Klei
 
             _gameSave = _dr.ParseHeaderAndTemplates();
 
-            if (_gameSave.BodyIsCompressed) DecompressBody();
+            if (_gameSave.BodyIsCompressed)
+            {
+                _dr.DecompressBody();
+                _gameSave.BodyIsCompressed = false;
+            }
 
             _gameSave.Body = _dr.ParseSaveFileBody();
             _isParsed = true;

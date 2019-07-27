@@ -3,7 +3,7 @@
     public class Settings : SectionType
     {
         public bool BaseAlreadyCreated { get; set; }
-        public int GameID { get; set; }
-        public int NextUniqueID { get; set; }
+        public int GameId { get; set; }
+        public int NextUniqueId { get; set; }
     }
 }

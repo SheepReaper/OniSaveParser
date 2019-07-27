@@ -44,12 +44,12 @@ namespace SheepReaper.GameSaves
             // This compare order is very important!!!
             // We must follow HLSL behavior in the case user specified min value is bigger than max value.
             var x = value1.X;
-            x = (x > max.X) ? max.X : x;
-            x = (x < min.X) ? min.X : x;
+            x = x > max.X ? max.X : x;
+            x = x < min.X ? min.X : x;
 
             var y = value1.Y;
-            y = (y > max.Y) ? max.Y : y;
-            y = (y < min.Y) ? min.Y : y;
+            y = y > max.Y ? max.Y : y;
+            y = y < min.Y ? min.Y : y;
 
             return new Vector2I(x, y);
         }
@@ -115,7 +115,7 @@ namespace SheepReaper.GameSaves
             return new Vector2
             {
                 X = vector.X,
-                Y = vector.Y,
+                Y = vector.Y
             };
         }
 
@@ -132,8 +132,8 @@ namespace SheepReaper.GameSaves
         public static Vector2I Max(Vector2I value1, Vector2I value2)
         {
             return new Vector2I(
-                (value1.X > value2.X) ? value1.X : value2.X,
-                (value1.Y > value2.Y) ? value1.Y : value2.Y);
+                value1.X > value2.X ? value1.X : value2.X,
+                value1.Y > value2.Y ? value1.Y : value2.Y);
         }
 
         [JitIntrinsic]
@@ -141,8 +141,8 @@ namespace SheepReaper.GameSaves
         public static Vector2I Min(Vector2I value1, Vector2I value2)
         {
             return new Vector2I(
-                (value1.X < value2.X) ? value1.X : value2.X,
-                (value1.Y < value2.Y) ? value1.Y : value2.Y);
+                value1.X < value2.X ? value1.X : value2.X,
+                value1.Y < value2.Y ? value1.Y : value2.Y);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -238,7 +238,7 @@ namespace SheepReaper.GameSaves
             return new Vector2I
             {
                 X = Convert.ToInt32(value1.X * invDiv),
-                Y = Convert.ToInt32(value1.Y * invDiv),
+                Y = Convert.ToInt32(value1.Y * invDiv)
             };
         }
 
@@ -268,7 +268,7 @@ namespace SheepReaper.GameSaves
             if (Vector.IsHardwareAccelerated)
             {
                 var dot = Dot(vector, normal);
-                return vector - (2 * dot * normal);
+                return vector - 2 * dot * normal;
             }
             else
             {
@@ -362,7 +362,7 @@ namespace SheepReaper.GameSaves
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
-            if ((array.Length - index) < 2)
+            if (array.Length - index < 2)
             {
                 throw new ArgumentException();
             }
@@ -384,7 +384,6 @@ namespace SheepReaper.GameSaves
 
         public override int GetHashCode()
         {
-            //return Combine(X.GetHashCode(), Y.GetHashCode());
             return ((X.GetHashCode() << 5) + X.GetHashCode()) ^ Y.GetHashCode();
         }
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace SheepReaper.GameSaves
+namespace SheepReaper.GameSaves.Extensions
 {
     public static class MemoryExtensions
     {

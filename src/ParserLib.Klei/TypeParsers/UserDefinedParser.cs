@@ -12,9 +12,9 @@ namespace SheepReaper.GameSaves.Klei.TypeParsers
 
             if (dataLength < 0) return null;
 
-            var parseStart = reader.Position;
+            var parseStart = reader.PositionInt;
             var obj = reader.Parse(templates, templateName);
-            var parseEnd = reader.Position;
+            var parseEnd = reader.PositionInt;
 
             var parseLength = parseEnd - parseStart;
 
@@ -35,7 +35,7 @@ namespace SheepReaper.GameSaves.Klei.TypeParsers
                 Console.WriteLine($"{extraString} was not parsed");
             }
 
-            var parseNewEnd = reader.Position;
+            var parseNewEnd = reader.PositionInt;
             parseLength = parseNewEnd - parseStart;
 
             if (parseLength != dataLength)

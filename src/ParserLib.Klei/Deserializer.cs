@@ -12,15 +12,15 @@ namespace SheepReaper.GameSaves.Klei
 
         private void DecompressBody()
         {
-            var bodyStartPosition = _dr.Position;
-            var uncompressedBodyBytes = ZlibStream.UncompressBuffer(_dr.GetBuffer().Slice(bodyStartPosition).ToArray());
+            var bodyStartPosition = _dr.PositionInt;
+            var uncompressedBodyBytes = ZlibStream.UncompressBuffer(_dr.GetBufferSpan().Slice(bodyStartPosition).ToArray());
             var uncompressedLength = bodyStartPosition + uncompressedBodyBytes.Length;
             var uncompressedStream = new MemoryStream(new byte[uncompressedLength], 0, uncompressedLength, true, true);
-            uncompressedStream.Write(_dr.GetBuffer().Slice(0, bodyStartPosition));
+            uncompressedStream.Write(_dr.GetBufferSpan().Slice(0, bodyStartPosition));
             uncompressedStream.Write(uncompressedBodyBytes);
             _dr = new DataReader(uncompressedStream)
             {
-                Position = bodyStartPosition,
+                PositionInt = bodyStartPosition,
                 Templates = _dr.Templates,
             };
             _gameSave.BodyIsCompressed = false;
@@ -49,7 +49,7 @@ namespace SheepReaper.GameSaves.Klei
         {
         }
 
-        public Deserializer(Span<byte> buffer)
+        public Deserializer(Memory<byte> buffer)
         {
             _dr = new DataReader(buffer);
             Parse(true);

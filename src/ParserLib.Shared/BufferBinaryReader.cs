@@ -7,52 +7,65 @@ namespace SheepReaper.GameSaves
 {
     public class BufferBinaryReader : BinaryReader, IBinaryReader
     {
-        public BufferBinaryReader(Span<byte> buffer) : this(new MemoryStream(buffer.ToArray(), 0, buffer.Length, true, true), Encoding.UTF8, false)
+        protected override void Dispose(bool disposing)
         {
-        }
-
-        public BufferBinaryReader(Span<byte> buffer, Encoding encoding) : this(new MemoryStream(buffer.ToArray(), 0, buffer.Length, true, true), encoding, false)
-        {
-        }
-
-        public BufferBinaryReader(Span<byte> buffer, Encoding encoding, bool leaveOpen) : this(new MemoryStream(buffer.ToArray(), 0, buffer.Length, true, true), encoding, leaveOpen)
-        {
-        }
-
-        public BufferBinaryReader(Stream stream) : this(stream.ToStatic(stream.CanWrite), Encoding.UTF8, false)
-        {
-        }
-
-        public BufferBinaryReader(Stream stream, Encoding encoding) : this(stream.ToStatic(stream.CanWrite), encoding, false)
-        {
-        }
-
-        public BufferBinaryReader(Stream stream, Encoding encoding, bool leaveOpen) : base(stream.ToStatic(stream.CanWrite), encoding, leaveOpen)
-        {
-        }
-
-        public bool CanGetBuffer { get; } = true;
-
-        public int Position { get => (int)BaseStream.Position; set => BaseStream.Position = value; }
-
-        public Span<byte> GetBuffer()
-        {
-            if (CanGetBuffer)
+            if (disposing)
             {
-                ((MemoryStream)BaseStream).TryGetBuffer(out var buffer);
-                return buffer;
+                Stream?.Dispose();
             }
-            else
-            {
-                throw new NotSupportedException("The underlying Stream to this ArrayBinaryReader instance is not a MemoryStream or otherwise does not support Getting the underlying buffer ");
-            }
+
+            base.Dispose(disposing);
+        }
+
+        public BufferBinaryReader(Memory<byte> memoryBuffer) : this(new MemoryStream(memoryBuffer.GetBuffer(), 0, memoryBuffer.Length, true, true), Encoding.UTF8, false)
+        {
+        }
+
+        public BufferBinaryReader(Memory<byte> memoryBuffer, Encoding encoding) : this(new MemoryStream(memoryBuffer.GetBuffer(), 0, memoryBuffer.Length, true, true), encoding, false)
+        {
+        }
+
+        public BufferBinaryReader(Memory<byte> memoryBuffer, Encoding encoding, bool leaveOpen) : this(new MemoryStream(memoryBuffer.GetBuffer(), 0, memoryBuffer.Length, true, true), encoding, leaveOpen)
+        {
+        }
+
+        public BufferBinaryReader(Stream stream) : this(stream, Encoding.UTF8, false)
+        {
+        }
+
+        public BufferBinaryReader(Stream stream, Encoding encoding) : this(stream, encoding, false)
+        {
+        }
+
+        public BufferBinaryReader(Stream stream, Encoding encoding, bool leaveOpen) : base(stream.ToStatic(stream.CanWrite).TeeAs<MemoryStream>(out var teeStream), encoding, leaveOpen)
+        {
+            Stream = teeStream;
+            teeStream.TryGetBuffer(out var buffer);
+            Buffer = new Memory<byte>(buffer.Array);
+        }
+
+        public Memory<byte> Buffer { get; set; }
+
+        public long Position
+        {
+            get => BaseStream.Position;
+            set => BaseStream.Position = value;
+        }
+
+        public int PositionInt { get => (int)BaseStream.Position; set => BaseStream.Position = value; }
+
+        public MemoryStream Stream { get; set; }
+
+        public Span<byte> GetBufferSpan()
+        {
+            return Buffer.Span;
         }
 
         public byte[] ReadAllBytes() => ReadBytes((int)(BaseStream.Length - BaseStream.Position));
 
         //public override int ReadInt32()
         //{
-        //    Console.WriteLine($"Call to read int: Position(base stream): {Position}({BaseStream.Position}) of {BaseStream.Length}(base stream)");
+        //    Console.WriteLine($"Call to read int: Position(base stream): {PositionInt}({BaseStream.Position}) of {BaseStream.Length}(base stream)");
         //    return base.ReadInt32();
         //}
 

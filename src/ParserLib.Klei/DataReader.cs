@@ -4,6 +4,7 @@ using SheepReaper.GameSaves.Klei.TypeParsers;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -53,28 +54,13 @@ namespace SheepReaper.GameSaves.Klei
 
         private Version Version { get; set; }
 
-        private GameData ParseGameData()
-        {
-            const string assemblyTypeName = "Game+GameSaveData";
-            var typeName = ValidateDotNetIdentifierName(ReadString());
-
-            if (typeName != assemblyTypeName)
-            {
-                throw new InvalidDataException($"Expected {assemblyTypeName} but got {typeName} instead.");
-            }
-
-            var obj = Parse(Templates, typeName);
-            var serialized = JsonConvert.SerializeObject(obj);
-            var deserialized = JsonConvert.DeserializeObject<GameData>(serialized);
-
-            return deserialized;
-        }
+        private GameData ParseGameData() => ParseSection<GameData>();
 
         private GameObjectBehavior ParseGameObjectBehavior()
         {
             var name = ValidateDotNetIdentifierName(ReadString());
             var dataLength = ReadInt32();
-            var preParsePosition = Position;
+            var preParsePosition = PositionInt;
             var templateData = Parse(Templates, name);
             var haveAppropriateExtraParser = _extraDataParsers.ContainsKey(name);
             var extraData = new List<object>();
@@ -86,7 +72,7 @@ namespace SheepReaper.GameSaves.Klei
                 extraData = extraDataParser.Parse(this, Templates);
             }
 
-            var postParsePosition = Position;
+            var postParsePosition = PositionInt;
             var dataRemaining = dataLength - (postParsePosition - preParsePosition);
 
             if (dataRemaining < 0)
@@ -122,7 +108,7 @@ namespace SheepReaper.GameSaves.Klei
             var prefabName = ValidateDotNetIdentifierName(ReadString());
             var instanceCount = ReadInt32();
             var dataLength = ReadInt32();
-            var preParsePosition = Position;
+            var preParsePosition = PositionInt;
             var gameObjects = new List<GameObject>(new GameObject[instanceCount]);
 
             for (var i = 0; i < instanceCount; i++)
@@ -130,7 +116,7 @@ namespace SheepReaper.GameSaves.Klei
                 gameObjects[i] = ParseGameObject();
             }
 
-            var postParsePosition = Position;
+            var postParsePosition = PositionInt;
             var bytesRemaining = dataLength - (postParsePosition - preParsePosition);
 
             if (bytesRemaining < 0)
@@ -180,20 +166,33 @@ namespace SheepReaper.GameSaves.Klei
             //Console.ReadKey();
         }
 
-        private Settings ParseSettings()
+        private T ParseSection<T>() where T : SectionType
         {
-            const string assemblyTypeName = "Game+Settings";
+            var expectedAssemblyNames = new[]
+            {
+                "Game+GameSaveData",
+                "Game+Settings",
+            };
 
             var typeName = ValidateDotNetIdentifierName(ReadString());
 
-            if (typeName != assemblyTypeName)
-                throw new InvalidOperationException($"Expected {assemblyTypeName} but read {typeName} instead.");
+            if (!expectedAssemblyNames.Contains(typeName))
+                throw new InvalidDataException($"Type '{typeName}' is unexpected. Expected '{expectedAssemblyNames}'.");
 
-            var serialized = JsonConvert.SerializeObject(Parse(Templates, assemblyTypeName));
+            var obj = Parse(Templates, typeName);
+            var serialized = JsonConvert.SerializeObject(obj);
+            var deserialized = JsonConvert.DeserializeObject<T>(serialized);
+
+            return deserialized;
+        }
+
+        private Settings ParseSettings()
+        {
+            var settings = ParseSection<Settings>();
 
             ParseKSav();
 
-            return JsonConvert.DeserializeObject<Settings>(serialized);
+            return settings;
         }
 
         /// <summary>
@@ -251,7 +250,7 @@ namespace SheepReaper.GameSaves.Klei
                     Properties = ParseTemplateMemberList(propertyCount)
                 };
 
-                //Console.WriteLine($"Parsed template {i + 1} of {templateCount}: {templates[i].Name} with {templates[i].Fields.Count} fields and {templates[i].Properties.Count} properties. At Stream Position {Position} of {BaseStream.Length}.");
+                //Console.WriteLine($"Parsed template {i + 1} of {templateCount}: {templates[i].Name} with {templates[i].Fields.Count} fields and {templates[i].Properties.Count} properties. At Stream Position {PositionInt} of {BaseStream.Length}.");
             }
 
             Templates = templates;
@@ -365,11 +364,11 @@ namespace SheepReaper.GameSaves.Klei
 
         public List<Template> Templates;
 
-        public DataReader(Span<byte> buffer) : base(buffer)
+        public DataReader(Memory<byte> buffer) : base(buffer)
         {
         }
 
-        public DataReader(Stream stream) : base(stream.ToWritableStatic())
+        public DataReader(Stream stream) : base(stream)
         {
         }
 
@@ -453,7 +452,7 @@ namespace SheepReaper.GameSaves.Klei
                 Header = ParseStreamHeader(),
                 Templates = ParseTemplates(),
                 BodyIsCompressed = BodyIsCompressed,
-                BodyStartIndex = Position,
+                BodyStartIndex = PositionInt,
             };
         }
 
@@ -493,16 +492,9 @@ namespace SheepReaper.GameSaves.Klei
 
                     string value;
 
-                    if (CanGetBuffer)
-                    {
-                        value = Encoding.UTF8.GetString(GetBuffer().Slice(Position, stringLength));
+                    value = Encoding.UTF8.GetString(GetBufferSpan().Slice(PositionInt, stringLength));
 
-                        BaseStream.Position += stringLength;
-                    }
-                    else
-                    {
-                        value = Encoding.UTF8.GetString(ReadBytes(stringLength));
-                    }
+                    BaseStream.Position += stringLength;
 
                     //Console.WriteLine($"value of decoded string: {value}");
                     return value;

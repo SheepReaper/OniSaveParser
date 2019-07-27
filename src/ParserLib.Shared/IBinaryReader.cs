@@ -5,7 +5,8 @@ namespace SheepReaper.GameSaves
 {
     public interface IBinaryReader
     {
-        int Position { get; }
+        Memory<byte> Buffer { get; set; }
+        int PositionInt { get; }
 
         byte[] ReadAllBytes();
 

@@ -1,11 +1,9 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace SheepReaper.GameSaves
 {
     public interface IBinaryReader
     {
-        //Memory<byte> Buffer { get; }
         int PositionInt { get; }
 
         byte[] ReadAllBytes();
@@ -47,9 +45,5 @@ namespace SheepReaper.GameSaves
         Vector3 ReadVector3();
 
         void SkipBytes(int length);
-
-        byte[] ViewAllBytes();
-
-        Array ViewBytes(int length);
     }
 }

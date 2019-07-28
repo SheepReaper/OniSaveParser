@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Runtime.Serialization;
 
 namespace SheepReaper.GameSaves.Klei.Schema.Oni
 {
@@ -7,7 +7,7 @@ namespace SheepReaper.GameSaves.Klei.Schema.Oni
         public object[][] CurrentQualityLevelsBySetting { get; set; }
         public int CustomGameMode { get; set; }
 
-        [JsonProperty("is_Custom_Game")]
+        [DataMember(Name = "is_Custom_Game")]
         public bool IsCustomGame { get; set; }
     }
 }

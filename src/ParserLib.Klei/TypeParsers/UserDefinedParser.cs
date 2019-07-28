@@ -15,7 +15,6 @@ namespace SheepReaper.GameSaves.Klei.TypeParsers
             var parseStart = reader.PositionInt;
             var obj = reader.Parse(templates, templateName);
             var parseEnd = reader.PositionInt;
-
             var parseLength = parseEnd - parseStart;
 
             if (parseLength < dataLength)
@@ -26,13 +25,6 @@ namespace SheepReaper.GameSaves.Klei.TypeParsers
                     obj,
                     extraString
                 };
-                //var bytes = reader.ReadBytes(dataLength - parseLength);
-
-                //foreach (var thisByte in bytes)
-                //{
-                //    Console.WriteLine(Convert.ToChar(thisByte));
-                //}
-                Console.WriteLine($"{extraString} was not parsed");
             }
 
             var parseNewEnd = reader.PositionInt;
@@ -40,7 +32,6 @@ namespace SheepReaper.GameSaves.Klei.TypeParsers
 
             if (parseLength != dataLength)
                 throw new InvalidOperationException(
-                //Console.Error.WriteLine(
                     $"Failed to parse object: Template name: {templateName} parsed {parseLength - dataLength} more than expected.");
 
             return obj;

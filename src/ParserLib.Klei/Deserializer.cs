@@ -5,14 +5,20 @@ namespace SheepReaper.GameSaves.Klei
 {
     public class Deserializer : IDisposable
     {
-        private DataReader _dr;
+        private IDataReader _dr;
         private GameSave _gameSave;
         private bool _isParsed;
+        private string _pathToSaveFile;
 
         private void Parse(bool isConfigured)
         {
             IsConfigured = isConfigured;
             Parse();
+        }
+
+        private void ThrowIfConfigured()
+        {
+            if (IsConfigured) throw new InvalidOperationException("This serializer instance is already configured.");
         }
 
         private void ThrowIfNotParsed()
@@ -22,14 +28,21 @@ namespace SheepReaper.GameSaves.Klei
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!disposing) return;
+            if (_dr is DataReader dataReader)
             {
-                _dr?.Dispose();
+                dataReader.BaseStream.Dispose();
             }
         }
 
         public Deserializer()
         {
+        }
+
+        public Deserializer(IDataReader dataReader)
+        {
+            _dr = dataReader;
+            IsConfigured = true;
         }
 
         public Deserializer(Memory<byte> buffer)
@@ -46,8 +59,20 @@ namespace SheepReaper.GameSaves.Klei
 
         public Deserializer(string pathToSaveFile)
         {
+            _pathToSaveFile = pathToSaveFile;
             _dr = new DataReader(new FileStream(pathToSaveFile, FileMode.Open));
             Parse(true);
+        }
+
+        public IDataReader DataReader
+        {
+            get => _dr;
+            set
+            {
+                ThrowIfConfigured();
+                _dr = value;
+                IsConfigured = true;
+            }
         }
 
         public GameSave GameSave
@@ -61,6 +86,18 @@ namespace SheepReaper.GameSaves.Klei
 
         public bool IsConfigured { get; private set; }
 
+        public string SaveFilePath
+        {
+            get => _pathToSaveFile;
+            set
+            {
+                ThrowIfConfigured();
+                _pathToSaveFile = value;
+                _dr = new DataReader(new FileStream(_pathToSaveFile, FileMode.Open));
+                IsConfigured = true;
+            }
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -69,17 +106,12 @@ namespace SheepReaper.GameSaves.Klei
 
         public GameSave Parse()
         {
-            if (!IsConfigured) throw new InvalidOperationException("Cannot call 'Parse' on a Parser that is not configured.");
+            if (_isParsed) return _gameSave;
 
-            _gameSave = _dr.ParseHeaderAndTemplates();
+            if (!IsConfigured)
+                throw new InvalidOperationException("Cannot call 'Parse' on a Parser that is not configured.");
 
-            if (_gameSave.BodyIsCompressed)
-            {
-                _dr.DecompressBody();
-                _gameSave.BodyIsCompressed = false;
-            }
-
-            _gameSave.Body = _dr.ParseSaveFileBody();
+            _gameSave = _dr.Parse();
             _isParsed = true;
 
             return _gameSave;

@@ -13,6 +13,7 @@ namespace SheepReaper.GameSaves.Klei.TypeParsers
             {
                 var name = reader.ValidateDotNetIdentifierName(reader.ReadString());
                 var gameObject = reader.ParseGameObject();
+
                 items[i] = new
                 {
                     name,

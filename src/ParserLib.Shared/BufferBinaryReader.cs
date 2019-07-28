@@ -1,16 +1,13 @@
-﻿using System;
+﻿using SheepReaper.GameSaves.Extensions;
+using System;
 using System.IO;
 using System.Numerics;
 using System.Text;
-using SheepReaper.GameSaves.Extensions;
 
 namespace SheepReaper.GameSaves
 {
     public class BufferBinaryReader : BinaryReader, IBinaryReader
     {
-        //private Memory<byte> _buffer;
-        public MemoryStream MemoryStream => (MemoryStream) BaseStream;
-
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -41,11 +38,12 @@ namespace SheepReaper.GameSaves
         {
         }
 
-        public BufferBinaryReader(Stream stream, Encoding encoding, bool leaveOpen) : base(stream.ToExpandable(stream.CanWrite).TeeAs<MemoryStream>(out var teeStream), encoding, leaveOpen)
+        public BufferBinaryReader(Stream stream, Encoding encoding, bool leaveOpen) : base(stream.ToExpandable(stream.CanWrite), encoding, leaveOpen)
         {
         }
 
         public Memory<byte> Buffer => BaseStream.GetMemory();
+        public MemoryStream MemoryStream => (MemoryStream)BaseStream;
 
         public long Position
         {
@@ -55,24 +53,12 @@ namespace SheepReaper.GameSaves
 
         public int PositionInt { get => (int)BaseStream.Position; set => BaseStream.Position = value; }
 
-        //public MemoryStream Stream
-        //{
-        //    get => _stream;
-        //    set => _stream = value;
-        //}
-
         public Span<byte> GetBufferSpan()
         {
             return Buffer.Span;
         }
 
         public byte[] ReadAllBytes() => ReadBytes((int)(BaseStream.Length - BaseStream.Position));
-
-        //public override int ReadInt32()
-        //{
-        //    Console.WriteLine($"Call to read int: Position(base stream): {PositionInt}({BaseStream.Position}) of {BaseStream.Length}(base stream)");
-        //    return base.ReadInt32();
-        //}
 
         public Quaternion ReadQuaternion()
         {
@@ -117,9 +103,5 @@ namespace SheepReaper.GameSaves
         {
             BaseStream.Position += length;
         }
-
-        public byte[] ViewAllBytes() => ReadAllBytes();
-
-        public Array ViewBytes(int length) => ReadBytes(length);
     }
 }

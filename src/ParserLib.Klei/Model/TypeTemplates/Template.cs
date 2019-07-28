@@ -12,7 +12,7 @@ namespace SheepReaper.GameSaves.Klei
         [DataMember(Order = 0)]
         public string Name { get; set; }
 
-        [DataMember(Order = 2, EmitDefaultValue = false)]
+        [DataMember(Order = 2)]
         public List<TemplateMember> Properties;
     }
 }

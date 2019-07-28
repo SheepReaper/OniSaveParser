@@ -75,6 +75,11 @@ namespace SheepReaper.GameSaves.Klei
             var haveAppropriateExtraParser = _extraDataParsers.ContainsKey(name);
             var extraData = new List<object>();
 
+            //if (PositionInt == preParsePosition)
+            //{
+            //    Console.WriteLine($"ExtraDataParserCandidate: {name}. Data Length: {dataLength}. Have Parser? {haveAppropriateExtraParser}. At position: {Position}");
+            //}
+
             if (haveAppropriateExtraParser)
             {
                 var extraDataParser = _extraDataParsers[name];
@@ -344,7 +349,7 @@ namespace SheepReaper.GameSaves.Klei
         {
             var typeCodeInt = ReadByte();
             var info = (SerializationTypeCode)typeCodeInt;
-            var inferredInt = (int)info & 0x7f;
+            var inferredInt = typeCodeInt & 0x7f;
             var inferredType = (SerializationTypeCode)inferredInt;
             var type = inferredType;
             var templateName = "";
@@ -385,9 +390,9 @@ namespace SheepReaper.GameSaves.Klei
             return new TypeInfo
             {
                 Info = info,
-                TypeCodeInt = typeCodeInt,
+                //TypeCodeInt = typeCodeInt,
                 InferredType = inferredType,
-                InferredTypeInt = inferredInt,
+                //InferredTypeInt = inferredInt,
                 TemplateName = templateName,
                 SubTypes = subTypes
             };
@@ -530,7 +535,7 @@ namespace SheepReaper.GameSaves.Klei
             switch (stringLength)
             {
                 case -1:
-                    return string.Empty;
+                    return "\0";
 
                 case 0:
                     return string.Empty;

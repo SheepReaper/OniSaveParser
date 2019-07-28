@@ -1,13 +1,21 @@
-﻿using System.Runtime.Serialization;
-
-namespace SheepReaper.GameSaves.Klei.Schema.Oni
+﻿namespace SheepReaper.GameSaves.Klei.Schema.Oni
 {
     //[DataContract]
     public class ConduitFlow
     {
         //[Contract]
-        public object SerializedContents { get; set; }
-        public object SerializedIdx { get; set; }
-        public object VersionedSerializedContents { get; set; }
+        public ConduitContents[] serializedContents;
+
+        public int[] SerializedIdx;
+
+        public SerializedContents[] VersionedSerializedContents;
+
+        public class ConduitContents
+        {
+        }
+
+        public class SerializedContents
+        {
+        }
     }
 }

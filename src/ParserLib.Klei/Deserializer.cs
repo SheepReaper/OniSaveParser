@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace SheepReaper.GameSaves.Klei
@@ -35,22 +36,26 @@ namespace SheepReaper.GameSaves.Klei
             }
         }
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public Deserializer()
         {
         }
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public Deserializer(IDataReader dataReader)
         {
             _dr = dataReader;
             IsConfigured = true;
         }
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public Deserializer(Memory<byte> buffer)
         {
             _dr = new DataReader(buffer);
             Parse(true);
         }
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public Deserializer(Stream stream)
         {
             _dr = new DataReader(stream);
@@ -64,6 +69,7 @@ namespace SheepReaper.GameSaves.Klei
             Parse(true);
         }
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public IDataReader DataReader
         {
             get => _dr;
@@ -85,7 +91,8 @@ namespace SheepReaper.GameSaves.Klei
         }
 
         public bool IsConfigured { get; private set; }
-
+        
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public string SaveFilePath
         {
             get => _pathToSaveFile;

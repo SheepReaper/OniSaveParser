@@ -7,9 +7,6 @@ namespace SheepReaper.GameSaves
 {
     public struct Vector2I : IEquatable<Vector2I>, IFormattable
     {
-        public int X;
-        public int Y;
-
         [JitIntrinsic]
         public Vector2I(int value) : this(value, value) { }
 
@@ -24,6 +21,10 @@ namespace SheepReaper.GameSaves
         public static Vector2I UnitX => new Vector2I(1, 0);
         public static Vector2I UnitY => new Vector2I(0, 1);
         public static Vector2I Zero => new Vector2I();
+
+        public int X { get; set; }
+
+        public int Y { get; set; }
 
         [JitIntrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -82,13 +83,11 @@ namespace SheepReaper.GameSaves
                 var difference = value1 - value2;
                 return Dot(difference, difference);
             }
-            else
-            {
-                var dx = value1.X - value2.X;
-                var dy = value1.Y - value2.Y;
 
-                return dx * dx + dy * dy;
-            }
+            var dx = value1.X - value2.X;
+            var dy = value1.Y - value2.Y;
+
+            return dx * dx + dy * dy;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -177,17 +176,15 @@ namespace SheepReaper.GameSaves
                 var length = value.Length();
                 return value / length;
             }
-            else
-            {
-                var ls = value.X * value.X + value.Y * value.Y;
-                var invNorm = 1.0 / Math.Sqrt(ls);
 
-                return new Vector2I
-                {
-                    X = Convert.ToInt32(value.X * invNorm),
-                    Y = Convert.ToInt32(value.Y * invNorm)
-                };
-            }
+            var ls = value.X * value.X + value.Y * value.Y;
+            var invNorm = 1.0 / Math.Sqrt(ls);
+
+            return new Vector2I
+            {
+                X = Convert.ToInt32(value.X * invNorm),
+                Y = Convert.ToInt32(value.Y * invNorm)
+            };
         }
 
         [JitIntrinsic]

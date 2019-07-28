@@ -66,12 +66,6 @@ namespace SheepReaper.GameSaves.Klei
         /// WARNING: Sequence Sensitive!
         /// </summary>
         /// <returns></returns>
-        private GameData ParseGameData() => ParseSection<GameData>();
-
-        /// <summary>
-        /// WARNING: Sequence Sensitive!
-        /// </summary>
-        /// <returns></returns>
         private GameObjectBehavior ParseGameObjectBehavior()
         {
             var name = ValidateDotNetIdentifierName(ReadString());
@@ -214,14 +208,19 @@ namespace SheepReaper.GameSaves.Klei
         /// <returns></returns>
         private GameSaveBodyPart ParseSaveFileBody()
         {
-            return new GameSaveBodyPart
+            var body = new GameSaveBodyPart
             {
                 World = ParseWorld(),
-                Settings = ParseSettings(),
-                Version = _version,
-                GameObjects = ParseGameObjects(),
-                GameData = ParseGameData()
+                Settings = ParseSection<Settings>()
             };
+
+            ParseKSav();
+
+            body.Version = _version;
+            body.GameObjects = ParseGameObjects();
+            body.GameData = ParseSection<GameData>();
+
+            return body;
         }
 
         /// <summary>
@@ -242,23 +241,10 @@ namespace SheepReaper.GameSaves.Klei
                 throw new InvalidDataException($"Type '{typeName}' is unexpected. Expected '{expectedAssemblyNames}'.");
 
             var obj = Parse(Templates, typeName);
-            var serialized = JsonConvert.SerializeObject(obj, new JsonSerializerSettings { ContractResolver = new IgnoreEmptyEnumerablesResolver() });
+            var serialized = JsonConvert.SerializeObject(obj, new JsonSerializerSettings { ContractResolver = new IgnoreEmptyEnumerableResolver() });
             var deserialized = JsonConvert.DeserializeObject<T>(serialized);
 
             return deserialized;
-        }
-
-        /// <summary>
-        /// WARNING: Sequence Sensitive!
-        /// </summary>
-        /// <returns></returns>
-        private Settings ParseSettings()
-        {
-            var settings = ParseSection<Settings>();
-
-            ParseKSav();
-
-            return settings;
         }
 
         /// <summary>
@@ -422,7 +408,7 @@ namespace SheepReaper.GameSaves.Klei
                 throw new InvalidOperationException($"Expected type name Klei.SaveFileRoot but got {typename}.");
 
             var obj = Parse(Templates, typename);
-            var serialized = JsonConvert.SerializeObject(obj, new JsonSerializerSettings { ContractResolver = new IgnoreEmptyEnumerablesResolver() });
+            var serialized = JsonConvert.SerializeObject(obj, new JsonSerializerSettings { ContractResolver = new IgnoreEmptyEnumerableResolver() });
             var deserialized = JsonConvert.DeserializeObject<World>(serialized);
 
             return deserialized;
@@ -544,7 +530,7 @@ namespace SheepReaper.GameSaves.Klei
             switch (stringLength)
             {
                 case -1:
-                    return null;
+                    return string.Empty;
 
                 case 0:
                     return string.Empty;

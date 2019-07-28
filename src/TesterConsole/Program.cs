@@ -23,7 +23,7 @@ namespace TesterConsole
             using (var writer = new FileStream(jsonOutputLocation, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
             {
                 writer.SetLength(0);
-                var serialized = JsonConvert.SerializeObject(gameSave, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new IgnoreEmptyEnumerablesResolver() });
+                var serialized = JsonConvert.SerializeObject(gameSave, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new IgnoreEmptyEnumerableResolver() });
                 var buffer = new Span<byte>(new byte[serialized.Length]);
                 Encoding.UTF8.GetBytes(serialized.AsSpan(), buffer);
 

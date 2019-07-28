@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace SheepReaper.GameSaves
 {
-    public class IgnoreEmptyEnumerablesResolver : DefaultContractResolver
+    public class IgnoreEmptyEnumerableResolver : DefaultContractResolver
     {
         protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
         {
@@ -34,9 +34,6 @@ namespace SheepReaper.GameSaves
                                 .GetField(member.Name)
                                 .GetValue(instance) as IEnumerable;
                             break;
-
-                        default:
-                            break;
                     }
 
                     return enumerable == null || enumerable.GetEnumerator().MoveNext();
@@ -46,6 +43,6 @@ namespace SheepReaper.GameSaves
             return property;
         }
 
-        public static readonly IgnoreEmptyEnumerablesResolver Instance = new IgnoreEmptyEnumerablesResolver();
+        public static readonly IgnoreEmptyEnumerableResolver Instance = new IgnoreEmptyEnumerableResolver();
     }
 }
